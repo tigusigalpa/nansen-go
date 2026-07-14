@@ -1,0 +1,62 @@
+package nansen
+
+import (
+	"errors"
+	"net/http"
+	"time"
+)
+
+type Option func(*Client) error
+
+func WithBaseURL(url string) Option {
+	return func(c *Client) error {
+		if url == "" {
+			return errors.New("nansen: base URL cannot be empty")
+		}
+		c.baseURL = url
+		return nil
+	}
+}
+
+func WithHTTPClient(client *http.Client) Option {
+	return func(c *Client) error {
+		if client == nil {
+			return errors.New("nansen: HTTP client cannot be nil")
+		}
+		c.httpClient = client
+		return nil
+	}
+}
+
+func WithTimeout(timeout time.Duration) Option {
+	return func(c *Client) error {
+		if timeout <= 0 {
+			return errors.New("nansen: timeout must be positive")
+		}
+		c.timeout = timeout
+		return nil
+	}
+}
+
+func WithRetry(maxAttempts int, initialDelay, maxDelay time.Duration) Option {
+	return func(c *Client) error {
+		if maxAttempts < 0 {
+			return errors.New("nansen: maxAttempts cannot be negative")
+		}
+		if maxAttempts > 0 {
+			if initialDelay <= 0 {
+				return errors.New("nansen: initial delay must be positive")
+			}
+			if maxDelay <= 0 {
+				return errors.New("nansen: max delay must be positive")
+			}
+		}
+		c.retry = retryConfig{
+			maxAttempts:    maxAttempts,
+			initialDelay:   initialDelay,
+			maxDelay:       maxDelay,
+			retryRateLimit: true,
+		}
+		return nil
+	}
+}
