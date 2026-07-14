@@ -1,18 +1,27 @@
 # nansen-go
 
+![Nansen AI Golang SDK](https://i.postimg.cc/hGsGsnDF/nansen-ai-api-golang.jpg)
+
 [![Go Reference](https://pkg.go.dev/badge/github.com/tigusigalpa/nansen-go.svg)](https://pkg.go.dev/github.com/tigusigalpa/nansen-go)
 
-A Go client for the [Nansen AI API](https://docs.nansen.ai/) that tries to stay out of your way. No third-party dependencies, no surprises — just the standard library and an API that feels like the rest of your Go code.
+A Go client for the [Nansen AI API](https://docs.nansen.ai/) that tries to stay out of your way. No third-party
+dependencies, no surprises — just the standard library and an API that feels like the rest of your Go code.
 
 ## Why you might like it
 
-- **Nothing to vendor.** The whole thing is built on the standard library. `go get` it and you're done — no dependency tree to audit.
-- **Contexts everywhere.** Every call takes a `context.Context` first, so timeouts and cancellation work exactly the way you'd expect.
-- **Configured with options, not structs.** `WithBaseURL`, `WithHTTPClient`, `WithTimeout`, `WithRetry` — mix and match what you need.
+- **Nothing to vendor.** The whole thing is built on the standard library. `go get` it and you're done — no dependency
+  tree to audit.
+- **Contexts everywhere.** Every call takes a `context.Context` first, so timeouts and cancellation work exactly the way
+  you'd expect.
+- **Configured with options, not structs.** `WithBaseURL`, `WithHTTPClient`, `WithTimeout`, `WithRetry` — mix and match
+  what you need.
 - **Safe to share.** Create one client and hand it to as many goroutines as you like. No locks, no fuss.
-- **Typed on purpose.** Chains, sort fields, trader types, and labels are real constants. Optional request fields are pointers, so a stray `false` or `0` never sneaks into your JSON.
-- **Errors you can actually inspect.** Failures come back as an `*APIError` with the status code, message, raw body, and rate-limit headers — and they play nicely with `errors.Is`.
-- **Retries when you want them.** Opt in with `WithRetry` and the client backs off exponentially on 429s, honoring `Retry-After`, `RateLimit-Reset`, and `X-RateLimit-Reset` along the way.
+- **Typed on purpose.** Chains, sort fields, trader types, and labels are real constants. Optional request fields are
+  pointers, so a stray `false` or `0` never sneaks into your JSON.
+- **Errors you can actually inspect.** Failures come back as an `*APIError` with the status code, message, raw body, and
+  rate-limit headers — and they play nicely with `errors.Is`.
+- **Retries when you want them.** Opt in with `WithRetry` and the client backs off exponentially on 429s, honoring
+  `Retry-After`, `RateLimit-Reset`, and `X-RateLimit-Reset` along the way.
 
 ## Installation
 
@@ -81,12 +90,12 @@ client, err := nansen.New(apiKey,
 )
 ```
 
-| Option | Description |
-| --- | --- |
-| `WithBaseURL` | Override the default base URL (`https://api.nansen.ai`). |
-| `WithHTTPClient` | Provide a custom `*http.Client`. |
-| `WithTimeout` | A default request timeout, used when your context doesn't already carry a deadline. |
-| `WithRetry` | Turns on automatic retries with exponential backoff. Takes max attempts, initial delay, and max delay. |
+| Option           | Description                                                                                            |
+|------------------|--------------------------------------------------------------------------------------------------------|
+| `WithBaseURL`    | Override the default base URL (`https://api.nansen.ai`).                                               |
+| `WithHTTPClient` | Provide a custom `*http.Client`.                                                                       |
+| `WithTimeout`    | A default request timeout, used when your context doesn't already carry a deadline.                    |
+| `WithRetry`      | Turns on automatic retries with exponential backoff. Takes max attempts, initial delay, and max delay. |
 
 ## What's available
 
@@ -133,15 +142,20 @@ if errors.Is(err, nansen.ErrNotFound)      { /* ... */ }
 
 Once you've called `WithRetry`, the client quietly retries a few situations for you:
 
-- **429 Too Many Requests** — it waits according to `Retry-After` or `RateLimit-Reset`/`X-RateLimit-Reset`, and stashes `RateLimit-Remaining`/`X-RateLimit-Remaining` on the returned `APIError` in case you want to peek at your remaining quota.
+- **429 Too Many Requests** — it waits according to `Retry-After` or `RateLimit-Reset`/`X-RateLimit-Reset`, and stashes
+  `RateLimit-Remaining`/`X-RateLimit-Remaining` on the returned `APIError` in case you want to peek at your remaining
+  quota.
 - **Transient 5xx responses** — the kind that usually clear up on a second try.
 - **Flaky network errors** — unless your context has already been cancelled.
 
-Backoff grows exponentially but never exceeds the max delay you set. One thing worth knowing: your timeout budget (from `WithTimeout` or a deadline on the context) covers **all** the attempts together, not each one on its own — so you always stay within the bound you asked for.
+Backoff grows exponentially but never exceeds the max delay you set. One thing worth knowing: your timeout budget (from
+`WithTimeout` or a deadline on the context) covers **all** the attempts together, not each one on its own — so you
+always stay within the bound you asked for.
 
 ## Optional fields and pointer helpers
 
-Optional request fields are pointers, which means `false`, `0`, and empty strings only get sent when you actually mean them:
+Optional request fields are pointers, which means `false`, `0`, and empty strings only get sent when you actually mean
+them:
 
 ```go
 req := &nansen.TokenScreenerRequest{
@@ -180,23 +194,28 @@ NANSEN_API_KEY=your_api_key go run ./examples/screener
 ## Endpoints covered
 
 ### Smart Money
+
 - `POST /api/v1/smart-money/netflow`
 - `POST /api/v1/smart-money/holdings`
 - `POST /api/v1/smart-money/dex-trades`
 
 ### Token God Mode & Screener
+
 - `POST /api/v1/token-screener`
 - `POST /api/v1/tgm/flow-intelligence`
 - `POST /api/v1/tgm/who-bought-sold`
 
 ### Profiler
+
 - `POST /api/v1/profiler/address/current-balance`
 - `POST /api/v1/profiler/dex-trades`
 
 ### Portfolio
+
 - `POST /api/v1/portfolio/defi-holdings`
 
 ### Historical Data (Backtesting)
+
 - `POST /api/v1beta1/tgm/historical-token-flow-summary`
 - `POST /api/v1beta1/smart-money/historical-token-balances`
 
