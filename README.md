@@ -7,6 +7,10 @@
 A Go client for the [Nansen AI API](https://docs.nansen.ai/) that tries to stay out of your way. No third-party
 dependencies, no surprises — just the standard library and an API that feels like the rest of your Go code.
 
+**Package:** [pkg.go.dev/github.com/tigusigalpa/nansen-go](https://pkg.go.dev/github.com/tigusigalpa/nansen-go)
+
+> 📖 **[Full documentation available on Wiki](https://github.com/tigusigalpa/nansen-go/wiki)**
+
 ## Why you might like it
 
 - **Nothing to vendor.** The whole thing is built on the standard library. `go get` it and you're done — no dependency
