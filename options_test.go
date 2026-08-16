@@ -33,6 +33,28 @@ func TestWithBaseURL_RejectsEmpty(t *testing.T) {
 	}
 }
 
+func TestWithBaseURL_ValidatesAndNormalizes(t *testing.T) {
+	c, err := New("key", WithBaseURL("https://example.com/"))
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+	if c.baseURL != "https://example.com" {
+		t.Errorf("baseURL = %q, want %q", c.baseURL, "https://example.com")
+	}
+
+	for _, baseURL := range []string{"example.com", "ftp://example.com", "https://example.com?foo=bar"} {
+		if _, err := New("key", WithBaseURL(baseURL)); err == nil {
+			t.Errorf("New() with base URL %q returned nil error", baseURL)
+		}
+	}
+}
+
+func TestNew_RejectsNilOption(t *testing.T) {
+	if _, err := New("key", nil); err == nil {
+		t.Error("expected error for nil option")
+	}
+}
+
 func TestWithTimeout_RejectsNonPositive(t *testing.T) {
 	if _, err := New("key", WithTimeout(0)); err == nil {
 		t.Error("expected error for zero timeout")

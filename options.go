@@ -10,10 +10,11 @@ type Option func(*Client) error
 
 func WithBaseURL(url string) Option {
 	return func(c *Client) error {
-		if url == "" {
-			return errors.New("nansen: base URL cannot be empty")
+		baseURL, err := normalizeBaseURL(url)
+		if err != nil {
+			return err
 		}
-		c.baseURL = url
+		c.baseURL = baseURL
 		return nil
 	}
 }

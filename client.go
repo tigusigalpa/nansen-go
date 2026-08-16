@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -50,6 +52,9 @@ func New(apiKey string, opts ...Option) (*Client, error) {
 	}
 
 	for _, opt := range opts {
+		if opt == nil {
+			return nil, fmt.Errorf("nansen: option cannot be nil")
+		}
 		if err := opt(c); err != nil {
 			return nil, err
 		}
@@ -62,6 +67,21 @@ func New(apiKey string, opts ...Option) (*Client, error) {
 	c.Historical = &HistoricalService{client: c}
 
 	return c, nil
+}
+
+func normalizeBaseURL(rawURL string) (string, error) {
+	parsed, err := url.ParseRequestURI(rawURL)
+	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
+		return "", fmt.Errorf("nansen: base URL must be an absolute HTTP(S) URL")
+	}
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return "", fmt.Errorf("nansen: base URL must use HTTP or HTTPS")
+	}
+	if parsed.RawQuery != "" || parsed.Fragment != "" {
+		return "", fmt.Errorf("nansen: base URL cannot include a query or fragment")
+	}
+
+	return strings.TrimRight(rawURL, "/"), nil
 }
 
 func (c *Client) doRequest(ctx context.Context, method, path string, body, out interface{}) error {
