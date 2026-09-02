@@ -135,7 +135,10 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body, out i
 
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			if out == nil {
-				io.Copy(io.Discard, resp.Body)
+				if _, err := io.Copy(io.Discard, resp.Body); err != nil {
+					resp.Body.Close()
+					return fmt.Errorf("nansen: failed to read response body: %w", err)
+				}
 				resp.Body.Close()
 				return nil
 			}

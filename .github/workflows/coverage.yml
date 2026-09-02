@@ -15,7 +15,7 @@ jobs:
           go-version: '1.22.x'
       - name: Run tests with coverage
         run: |
-          go test -race -covermode=atomic -coverprofile=coverage.out . ./price ./transport
+          go test -race -covermode=atomic -coverprofile=coverage.out ./...
           go tool cover -func=coverage.out
       - name: Upload to Codecov
         uses: codecov/codecov-action@v5
