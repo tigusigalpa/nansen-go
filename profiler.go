@@ -10,11 +10,13 @@ type ProfilerService struct {
 // ProfilerAddressBalancesSortField enumerates the sortable balance fields.
 type ProfilerAddressBalancesSortField string
 
+// BalanceSortValueUSD and BalanceSortTokenSymbol are fields sortable by address balances.
 const (
 	BalanceSortValueUSD    ProfilerAddressBalancesSortField = "value_usd"
 	BalanceSortTokenSymbol ProfilerAddressBalancesSortField = "token_symbol"
 )
 
+// ProfilerAddressBalancesFilters limits profiler address balance results.
 type ProfilerAddressBalancesFilters struct {
 	ValueUSD     *NumericRangeFilter `json:"value_usd,omitempty"`
 	PriceUSD     *NumericRangeFilter `json:"price_usd,omitempty"`
@@ -24,6 +26,7 @@ type ProfilerAddressBalancesFilters struct {
 	TokenName    interface{}         `json:"token_name,omitempty"`
 }
 
+// ProfilerAddressBalancesRequest specifies an address balance query.
 type ProfilerAddressBalancesRequest struct {
 	Address       string                          `json:"address,omitempty"`
 	EntityName    string                          `json:"entity_name,omitempty"`
@@ -34,6 +37,7 @@ type ProfilerAddressBalancesRequest struct {
 	OrderBy       []SortOrder                     `json:"order_by,omitempty"`
 }
 
+// ProfilerBalance contains a token balance held by an address.
 type ProfilerBalance struct {
 	Chain        string   `json:"chain"`
 	Address      string   `json:"address"`
@@ -45,6 +49,7 @@ type ProfilerBalance struct {
 	ValueUsd     *float64 `json:"value_usd,omitempty"`
 }
 
+// ProfilerAddressBalancesResponse contains paginated address balance results.
 type ProfilerAddressBalancesResponse struct {
 	Data       []ProfilerBalance `json:"data"`
 	Pagination PaginationInfo    `json:"pagination"`
@@ -62,6 +67,7 @@ func (s *ProfilerService) AddressCurrentBalance(ctx context.Context, req *Profil
 // ProfilerDexTradeSortField enumerates the sortable trade fields.
 type ProfilerDexTradeSortField string
 
+// ProfilerDexSortChain through ProfilerDexSortTradeValueUSD are fields sortable by profiler DEX trades.
 const (
 	ProfilerDexSortChain                ProfilerDexTradeSortField = "chain"
 	ProfilerDexSortBlockTimestamp       ProfilerDexTradeSortField = "block_timestamp"
@@ -79,6 +85,7 @@ const (
 	ProfilerDexSortTradeValueUSD        ProfilerDexTradeSortField = "trade_value_usd"
 )
 
+// ProfilerDexTradeFilters limits profiler DEX trade results.
 type ProfilerDexTradeFilters struct {
 	TokenBoughtAddress   string              `json:"token_bought_address,omitempty"`
 	TokenSoldAddress     string              `json:"token_sold_address,omitempty"`
@@ -95,6 +102,7 @@ type ProfilerDexTradeFilters struct {
 	TradeValueUSD        *NumericRangeFilter `json:"trade_value_usd,omitempty"`
 }
 
+// ProfilerDexTradeRequest specifies a profiler DEX trades query.
 type ProfilerDexTradeRequest struct {
 	Address    string                   `json:"address"`
 	Chain      Chain                    `json:"chain"`
@@ -104,6 +112,7 @@ type ProfilerDexTradeRequest struct {
 	OrderBy    []SortOrder              `json:"order_by,omitempty"`
 }
 
+// ProfilerDexTrade contains a DEX trade associated with an address.
 type ProfilerDexTrade struct {
 	Chain                string   `json:"chain"`
 	BlockTimestamp       string   `json:"block_timestamp"`
@@ -125,6 +134,7 @@ type ProfilerDexTrade struct {
 	TradeValueUSD        *float64 `json:"trade_value_usd,omitempty"`
 }
 
+// ProfilerDexTradeResponse contains paginated profiler DEX trade results.
 type ProfilerDexTradeResponse struct {
 	Data       []ProfilerDexTrade `json:"data"`
 	Pagination PaginationInfo     `json:"pagination"`

@@ -7,10 +7,12 @@ type PortfolioService struct {
 	client *Client
 }
 
+// PortfolioDefiHoldingsRequest specifies a wallet portfolio query.
 type PortfolioDefiHoldingsRequest struct {
 	WalletAddress string `json:"wallet_address"`
 }
 
+// HoldingsSummary contains aggregate values for a wallet's DeFi holdings.
 type HoldingsSummary struct {
 	TotalValueUSD   float64 `json:"total_value_usd"`
 	TotalAssetsUSD  float64 `json:"total_assets_usd"`
@@ -20,6 +22,7 @@ type HoldingsSummary struct {
 	ProtocolCount   int     `json:"protocol_count"`
 }
 
+// ProtocolToken describes a token position within a DeFi protocol.
 type ProtocolToken struct {
 	Address      *string      `json:"address,omitempty"`
 	Symbol       *string      `json:"symbol,omitempty"`
@@ -28,6 +31,7 @@ type ProtocolToken struct {
 	PositionType PositionType `json:"position_type"`
 }
 
+// ProtocolHolding describes all positions in a DeFi protocol.
 type ProtocolHolding struct {
 	ProtocolName    string          `json:"protocol_name"`
 	Chain           string          `json:"chain"`
@@ -38,6 +42,7 @@ type ProtocolHolding struct {
 	Tokens          []ProtocolToken `json:"tokens"`
 }
 
+// PortfolioDefiHoldingsResponse contains a wallet's DeFi holdings.
 type PortfolioDefiHoldingsResponse struct {
 	Summary   HoldingsSummary   `json:"summary"`
 	Protocols []ProtocolHolding `json:"protocols"`

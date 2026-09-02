@@ -7,6 +7,7 @@ type HistoricalService struct {
 	client *Client
 }
 
+// TGMHistoricalTokenFlowSummaryRequest specifies a historical token-flow query.
 type TGMHistoricalTokenFlowSummaryRequest struct {
 	Chain                Chain     `json:"chain"`
 	TokenAddress         string    `json:"token_address"`
@@ -14,6 +15,7 @@ type TGMHistoricalTokenFlowSummaryRequest struct {
 	ApplyBlacklistFilter *bool     `json:"apply_blacklist_filter,omitempty"`
 }
 
+// TGMHistoricalTokenFlowSummary contains historical flow metrics for a token.
 type TGMHistoricalTokenFlowSummary struct {
 	TokenSymbol             *string  `json:"token_symbol,omitempty"`
 	PublicFigureNetFlowUSD  *float64 `json:"public_figure_net_flow_usd,omitempty"`
@@ -36,6 +38,7 @@ type TGMHistoricalTokenFlowSummary struct {
 	FreshWalletsWalletCount *int     `json:"fresh_wallets_wallet_count,omitempty"`
 }
 
+// TGMHistoricalTokenFlowSummaryResponse contains historical token-flow results.
 type TGMHistoricalTokenFlowSummaryResponse struct {
 	Data     []TGMHistoricalTokenFlowSummary `json:"data"`
 	Warnings []string                        `json:"warnings,omitempty"`
@@ -54,6 +57,7 @@ func (s *HistoricalService) HistoricalTokenFlowSummary(ctx context.Context, req 
 // historical smart-money balances.
 type HistoricalSmartMoneyFilterType string
 
+// HistoricalLabelFund through HistoricalLabelSmartHLPerpsTrader identify historical smart-money cohorts.
 const (
 	HistoricalLabelFund               HistoricalSmartMoneyFilterType = "Fund"
 	HistoricalLabelSmartTrader        HistoricalSmartMoneyFilterType = "Smart Trader"
@@ -67,6 +71,7 @@ const (
 	HistoricalLabelSmartHLPerpsTrader HistoricalSmartMoneyFilterType = "Smart HL Perps Trader"
 )
 
+// SmartMoneyHistoricalTokenBalancesFilters limits historical token balance results.
 type SmartMoneyHistoricalTokenBalancesFilters struct {
 	SMFilter            []HistoricalSmartMoneyFilterType `json:"sm_filter,omitempty"`
 	IncludeStablecoins  *bool                            `json:"include_stablecoins,omitempty"`
@@ -74,6 +79,7 @@ type SmartMoneyHistoricalTokenBalancesFilters struct {
 	HoldersCount        *IntegerRangeFilter              `json:"holders_count,omitempty"`
 }
 
+// SmartMoneyHistoricalTokenBalancesRequest specifies a historical token balance query.
 type SmartMoneyHistoricalTokenBalancesRequest struct {
 	AsOfDate             string                                    `json:"as_of_date"`
 	Chains               []Chain                                   `json:"chains,omitempty"`
@@ -82,6 +88,7 @@ type SmartMoneyHistoricalTokenBalancesRequest struct {
 	Pagination           *PaginationRequest                        `json:"pagination,omitempty"`
 }
 
+// SmartMoneyHistoricalTokenBalance contains a point-in-time smart-money token balance.
 type SmartMoneyHistoricalTokenBalance struct {
 	Chain                   string   `json:"chain"`
 	TokenAddress            string   `json:"token_address"`
@@ -95,6 +102,7 @@ type SmartMoneyHistoricalTokenBalance struct {
 	MarketCapUsd            *float64 `json:"market_cap_usd,omitempty"`
 }
 
+// SmartMoneyHistoricalTokenBalancesResponse contains paginated historical token balances.
 type SmartMoneyHistoricalTokenBalancesResponse struct {
 	Data       []SmartMoneyHistoricalTokenBalance `json:"data"`
 	Pagination PaginationInfo                     `json:"pagination"`

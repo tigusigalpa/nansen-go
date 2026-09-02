@@ -2,7 +2,14 @@
 
 ![Nansen AI Golang SDK](https://i.postimg.cc/hGsGsnDF/nansen-ai-api-golang.jpg)
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/tigusigalpa/nansen-go.svg)](https://pkg.go.dev/github.com/tigusigalpa/nansen-go)
+[![CI](https://github.com/tigusigalpa/nansen-go/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/nansen-go/actions/workflows/ci.yml)
+[![Tests](https://github.com/tigusigalpa/nansen-go/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/nansen-go/actions/workflows/test.yml)
+[![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat-square&logo=go)](https://golang.org/)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
+[![CodeQL](https://github.com/tigusigalpa/nansen-go/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/nansen-go/actions/workflows/codeql.yml)
+[![Codecov](https://codecov.io/gh/tigusigalpa/nansen-go/graph/badge.svg)](https://codecov.io/gh/tigusigalpa/nansen-go)
+[![GitHub Release](https://img.shields.io/github/v/release/tigusigalpa/nansen-go?style=flat-square)](https://github.com/tigusigalpa/nansen-go/releases)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue?style=flat-square&logo=go)](https://pkg.go.dev/github.com/tigusigalpa/nansen-go)
 
 A Go client for the [Nansen AI API](https://docs.nansen.ai/) that tries to stay out of your way. No third-party
 dependencies, no surprises — just the standard library and an API that feels like the rest of your Go code.

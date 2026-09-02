@@ -10,6 +10,7 @@ type SmartMoneyService struct {
 // SmartMoneyNetflowSortField enumerates the sortable fields for netflows.
 type SmartMoneyNetflowSortField string
 
+// NetflowSortChain through NetflowSortMarketCapUSD are fields sortable by netflow.
 const (
 	NetflowSortChain         SmartMoneyNetflowSortField = "chain"
 	NetflowSortTokenAddress  SmartMoneyNetflowSortField = "token_address"
@@ -24,6 +25,7 @@ const (
 	NetflowSortMarketCapUSD  SmartMoneyNetflowSortField = "market_cap_usd"
 )
 
+// SmartMoneyNetflowFilters limits smart-money netflow results.
 type SmartMoneyNetflowFilters struct {
 	IncludeSmartMoneyLabels []SmartMoneyLabel   `json:"include_smart_money_labels,omitempty"`
 	ExcludeSmartMoneyLabels []SmartMoneyLabel   `json:"exclude_smart_money_labels,omitempty"`
@@ -36,6 +38,7 @@ type SmartMoneyNetflowFilters struct {
 	MarketCapUSD            *NumericRangeFilter `json:"market_cap_usd,omitempty"`
 }
 
+// SmartMoneyNetflowRequest specifies a smart-money netflow query.
 type SmartMoneyNetflowRequest struct {
 	Chains     []Chain                   `json:"chains"`
 	Filters    *SmartMoneyNetflowFilters `json:"filters,omitempty"`
@@ -43,6 +46,7 @@ type SmartMoneyNetflowRequest struct {
 	OrderBy    []SortOrder               `json:"order_by,omitempty"`
 }
 
+// SmartMoneyNetflow contains netflow metrics for one token and chain.
 type SmartMoneyNetflow struct {
 	TokenAddress  string   `json:"token_address"`
 	TokenSymbol   string   `json:"token_symbol"`
@@ -57,6 +61,7 @@ type SmartMoneyNetflow struct {
 	MarketCapUsd  *float64 `json:"market_cap_usd,omitempty"`
 }
 
+// SmartMoneyNetflowResponse contains paginated netflow results.
 type SmartMoneyNetflowResponse struct {
 	Data       []SmartMoneyNetflow `json:"data"`
 	Pagination PaginationInfo      `json:"pagination"`
@@ -74,6 +79,7 @@ func (s *SmartMoneyService) Netflow(ctx context.Context, req *SmartMoneyNetflowR
 // SmartMoneyHoldingsSortField enumerates the sortable fields for holdings.
 type SmartMoneyHoldingsSortField string
 
+// HoldingsSortChain through HoldingsSortMarketCapUSD are fields sortable by holdings.
 const (
 	HoldingsSortChain              SmartMoneyHoldingsSortField = "chain"
 	HoldingsSortTokenAddress       SmartMoneyHoldingsSortField = "token_address"
@@ -86,6 +92,7 @@ const (
 	HoldingsSortMarketCapUSD       SmartMoneyHoldingsSortField = "market_cap_usd"
 )
 
+// SmartMoneyHoldingsFilters limits smart-money holdings results.
 type SmartMoneyHoldingsFilters struct {
 	IncludeSmartMoneyLabels []SmartMoneyLabel   `json:"include_smart_money_labels,omitempty"`
 	ExcludeSmartMoneyLabels []SmartMoneyLabel   `json:"exclude_smart_money_labels,omitempty"`
@@ -102,6 +109,7 @@ type SmartMoneyHoldingsFilters struct {
 	TokenSectors            []string            `json:"token_sectors,omitempty"`
 }
 
+// SmartMoneyHoldingsRequest specifies a smart-money holdings query.
 type SmartMoneyHoldingsRequest struct {
 	Chains     []Chain                    `json:"chains"`
 	Filters    *SmartMoneyHoldingsFilters `json:"filters,omitempty"`
@@ -109,6 +117,7 @@ type SmartMoneyHoldingsRequest struct {
 	OrderBy    []SortOrder                `json:"order_by,omitempty"`
 }
 
+// SmartMoneyHolding contains holdings metrics for one token and chain.
 type SmartMoneyHolding struct {
 	Chain                   string   `json:"chain"`
 	TokenAddress            string   `json:"token_address"`
@@ -122,6 +131,7 @@ type SmartMoneyHolding struct {
 	MarketCapUsd            *float64 `json:"market_cap_usd,omitempty"`
 }
 
+// SmartMoneyHoldingsResponse contains paginated holdings results.
 type SmartMoneyHoldingsResponse struct {
 	Data       []SmartMoneyHolding `json:"data"`
 	Pagination PaginationInfo      `json:"pagination"`
@@ -139,6 +149,7 @@ func (s *SmartMoneyService) Holdings(ctx context.Context, req *SmartMoneyHolding
 // SmartMoneyDexTradesSortField enumerates the sortable fields for DEX trades.
 type SmartMoneyDexTradesSortField string
 
+// DexTradesSortChain through DexTradesSortTradeValueUSD are fields sortable by DEX trades.
 const (
 	DexTradesSortChain                SmartMoneyDexTradesSortField = "chain"
 	DexTradesSortBlockTimestamp       SmartMoneyDexTradesSortField = "block_timestamp"
@@ -160,6 +171,7 @@ const (
 	DexTradesSortTradeValueUSD        SmartMoneyDexTradesSortField = "trade_value_usd"
 )
 
+// SmartMoneyDexTradesFilters limits smart-money DEX trade results.
 type SmartMoneyDexTradesFilters struct {
 	IncludeSmartMoneyLabels []SmartMoneyLabel   `json:"include_smart_money_labels,omitempty"`
 	ExcludeSmartMoneyLabels []SmartMoneyLabel   `json:"exclude_smart_money_labels,omitempty"`
@@ -182,6 +194,7 @@ type SmartMoneyDexTradesFilters struct {
 	TradeValueUSD           *NumericRangeFilter `json:"trade_value_usd,omitempty"`
 }
 
+// SmartMoneyDexTradesRequest specifies a smart-money DEX trades query.
 type SmartMoneyDexTradesRequest struct {
 	Chains     []Chain                     `json:"chains"`
 	Filters    *SmartMoneyDexTradesFilters `json:"filters,omitempty"`
@@ -189,6 +202,7 @@ type SmartMoneyDexTradesRequest struct {
 	OrderBy    []SortOrder                 `json:"order_by,omitempty"`
 }
 
+// SmartMoneyDexTrade contains a smart-money DEX trade.
 type SmartMoneyDexTrade struct {
 	Chain                string   `json:"chain"`
 	BlockTimestamp       string   `json:"block_timestamp"`
@@ -210,6 +224,7 @@ type SmartMoneyDexTrade struct {
 	TradeValueUSD        *float64 `json:"trade_value_usd,omitempty"`
 }
 
+// SmartMoneyDexTradesResponse contains paginated DEX trade results.
 type SmartMoneyDexTradesResponse struct {
 	Data       []SmartMoneyDexTrade `json:"data"`
 	Pagination PaginationInfo       `json:"pagination"`

@@ -10,6 +10,7 @@ type TokenGodModeService struct {
 // TokenScreenerTimeframe enumerates the supported screener time windows.
 type TokenScreenerTimeframe string
 
+// Timeframe5M through Timeframe30D identify supported token-screener time windows.
 const (
 	Timeframe5M  TokenScreenerTimeframe = "5m"
 	Timeframe10M TokenScreenerTimeframe = "10m"
@@ -23,6 +24,7 @@ const (
 // TokenScreenerSortField enumerates the sortable fields for the token screener.
 type TokenScreenerSortField string
 
+// ScreenerSortChain through ScreenerSortTokenAgeDays are fields sortable by the token screener.
 const (
 	ScreenerSortChain           TokenScreenerSortField = "chain"
 	ScreenerSortTokenAddress    TokenScreenerSortField = "token_address"
@@ -47,6 +49,7 @@ const (
 	ScreenerSortTokenAgeDays    TokenScreenerSortField = "token_age_days"
 )
 
+// TokenScreenerFilters limits token-screener results.
 type TokenScreenerFilters struct {
 	TokenAddress            interface{}         `json:"token_address,omitempty"`
 	TokenSymbol             interface{}         `json:"token_symbol,omitempty"`
@@ -77,6 +80,7 @@ type TokenScreenerFilters struct {
 	ExcludeSmartMoneyLabels []SmartMoneyLabel   `json:"exclude_smart_money_labels,omitempty"`
 }
 
+// TokenScreenerRequest specifies a token-screener query.
 type TokenScreenerRequest struct {
 	Chains     []Chain                 `json:"chains"`
 	Timeframe  *TokenScreenerTimeframe `json:"timeframe,omitempty"`
@@ -86,6 +90,7 @@ type TokenScreenerRequest struct {
 	OrderBy    []SortOrder             `json:"order_by,omitempty"`
 }
 
+// TokenScreenerResult contains metrics for a screened token.
 type TokenScreenerResult struct {
 	Chain               string   `json:"chain"`
 	TokenAddress        string   `json:"token_address"`
@@ -112,6 +117,7 @@ type TokenScreenerResult struct {
 	OutflowFDVRatio     *float64 `json:"outflow_fdv_ratio,omitempty"`
 }
 
+// TokenScreenerResponse contains paginated token-screener results.
 type TokenScreenerResponse struct {
 	Data       []TokenScreenerResult `json:"data"`
 	Pagination PaginationInfo        `json:"pagination"`
@@ -129,6 +135,7 @@ func (s *TokenGodModeService) TokenScreener(ctx context.Context, req *TokenScree
 // TGMFlowIntelligenceTimeframe enumerates the supported flow-intelligence windows.
 type TGMFlowIntelligenceTimeframe string
 
+// FlowTimeframe5M through FlowTimeframe7D identify supported flow-intelligence time windows.
 const (
 	FlowTimeframe5M  TGMFlowIntelligenceTimeframe = "5m"
 	FlowTimeframe1H  TGMFlowIntelligenceTimeframe = "1h"
@@ -138,6 +145,7 @@ const (
 	FlowTimeframe7D  TGMFlowIntelligenceTimeframe = "7d"
 )
 
+// TGMFlowIntelligenceFilters limits flow-intelligence results.
 type TGMFlowIntelligenceFilters struct {
 	PublicFigureNetFlowUSD  *NumericRangeFilter `json:"public_figure_net_flow_usd,omitempty"`
 	PublicFigureAvgFlowUSD  *NumericRangeFilter `json:"public_figure_avg_flow_usd,omitempty"`
@@ -159,6 +167,7 @@ type TGMFlowIntelligenceFilters struct {
 	FreshWalletsWalletCount *IntegerRangeFilter `json:"fresh_wallets_wallet_count,omitempty"`
 }
 
+// TGMFlowIntelligenceRequest specifies a flow-intelligence query.
 type TGMFlowIntelligenceRequest struct {
 	Chain        Chain                         `json:"chain"`
 	TokenAddress string                        `json:"token_address"`
@@ -166,6 +175,7 @@ type TGMFlowIntelligenceRequest struct {
 	Filters      *TGMFlowIntelligenceFilters   `json:"filters,omitempty"`
 }
 
+// TGMFlowIntelligence contains flow metrics for a token.
 type TGMFlowIntelligence struct {
 	PublicFigureNetFlowUSD  *float64 `json:"public_figure_net_flow_usd,omitempty"`
 	PublicFigureAvgFlowUSD  *float64 `json:"public_figure_avg_flow_usd,omitempty"`
@@ -187,6 +197,7 @@ type TGMFlowIntelligence struct {
 	FreshWalletsWalletCount *int     `json:"fresh_wallets_wallet_count,omitempty"`
 }
 
+// TGMFlowIntelligenceResponse contains paginated flow-intelligence results.
 type TGMFlowIntelligenceResponse struct {
 	Data     []TGMFlowIntelligence `json:"data"`
 	Warnings []string              `json:"warnings,omitempty"`
@@ -204,6 +215,7 @@ func (s *TokenGodModeService) FlowIntelligence(ctx context.Context, req *TGMFlow
 // TGMWhoBoughtSoldSortField enumerates the sortable fields.
 type TGMWhoBoughtSoldSortField string
 
+// WhoBoughtSoldSortBoughtVolumeUSD through WhoBoughtSoldSortSoldTokenVolume are sortable fields.
 const (
 	WhoBoughtSoldSortBoughtVolumeUSD   TGMWhoBoughtSoldSortField = "bought_volume_usd"
 	WhoBoughtSoldSortSoldVolumeUSD     TGMWhoBoughtSoldSortField = "sold_volume_usd"
@@ -213,6 +225,7 @@ const (
 	WhoBoughtSoldSortSoldTokenVolume   TGMWhoBoughtSoldSortField = "sold_token_volume"
 )
 
+// TGMWhoBoughtSoldFilters limits who-bought-sold results.
 type TGMWhoBoughtSoldFilters struct {
 	IncludeSmartMoneyLabels []SmartMoneyLabel   `json:"include_smart_money_labels,omitempty"`
 	ExcludeSmartMoneyLabels []SmartMoneyLabel   `json:"exclude_smart_money_labels,omitempty"`
@@ -226,6 +239,7 @@ type TGMWhoBoughtSoldFilters struct {
 	TradeVolumeUSD          *NumericRangeFilter `json:"trade_volume_usd,omitempty"`
 }
 
+// TGMWhoBoughtSoldRequest specifies a who-bought-sold query.
 type TGMWhoBoughtSoldRequest struct {
 	Chain        Chain                    `json:"chain"`
 	TokenAddress string                   `json:"token_address"`
@@ -236,6 +250,7 @@ type TGMWhoBoughtSoldRequest struct {
 	OrderBy      []SortOrder              `json:"order_by,omitempty"`
 }
 
+// TGMWhoBoughtSold contains aggregate trading activity for a token.
 type TGMWhoBoughtSold struct {
 	Address           string   `json:"address"`
 	AddressLabel      *string  `json:"address_label,omitempty"`
@@ -247,6 +262,7 @@ type TGMWhoBoughtSold struct {
 	TradeVolumeUSD    *float64 `json:"trade_volume_usd,omitempty"`
 }
 
+// TGMWhoBoughtSoldResponse contains paginated who-bought-sold results.
 type TGMWhoBoughtSoldResponse struct {
 	Data       []TGMWhoBoughtSold `json:"data"`
 	Pagination PaginationInfo     `json:"pagination"`

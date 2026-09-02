@@ -1,14 +1,21 @@
 package nansen
 
-// Pointer helpers make it easy to build JSON requests without sending zero-values.
-func StringPtr(s string) *string    { return &s }
-func IntPtr(i int) *int             { return &i }
-func BoolPtr(b bool) *bool          { return &b }
+// StringPtr returns a pointer to s.
+func StringPtr(s string) *string { return &s }
+
+// IntPtr returns a pointer to i.
+func IntPtr(i int) *int { return &i }
+
+// BoolPtr returns a pointer to b.
+func BoolPtr(b bool) *bool { return &b }
+
+// Float64Ptr returns a pointer to f.
 func Float64Ptr(f float64) *float64 { return &f }
 
 // Chain represents a blockchain network supported across Nansen endpoints.
 type Chain string
 
+// ChainAll through ChainTron identify blockchain networks supported by Nansen.
 const (
 	ChainAll         Chain = "all"
 	ChainArbitrum    Chain = "arbitrum"
@@ -44,6 +51,7 @@ const (
 // SortDirection controls ordering of result sets.
 type SortDirection string
 
+// SortAsc and SortDesc define result ordering directions.
 const (
 	SortAsc  SortDirection = "ASC"
 	SortDesc SortDirection = "DESC"
@@ -90,6 +98,7 @@ type IntegerRangeFilter struct {
 // SmartMoneyLabel filters smart-money cohorts.
 type SmartMoneyLabel string
 
+// LabelFund through LabelSmartHLPerpsTrader identify smart-money cohorts.
 const (
 	LabelFund               SmartMoneyLabel = "Fund"
 	LabelSmartTrader        SmartMoneyLabel = "Smart Trader"
@@ -102,6 +111,7 @@ const (
 // TraderType filters the cohort of traders for the token screener.
 type TraderType string
 
+// TraderAll through TraderPredictedWinner identify token-screener trader cohorts.
 const (
 	TraderAll                   TraderType = "all"
 	TraderSmartMoney            TraderType = "sm"
@@ -116,6 +126,7 @@ const (
 // BuyOrSell controls the trade direction for who-bought-sold queries.
 type BuyOrSell string
 
+// Buy and Sell identify the direction of a trade.
 const (
 	Buy  BuyOrSell = "BUY"
 	Sell BuyOrSell = "SELL"
@@ -124,6 +135,7 @@ const (
 // PositionType describes the role of a DeFi token position.
 type PositionType string
 
+// PositionDeposit through PositionMixed identify DeFi position roles.
 const (
 	PositionDeposit PositionType = "deposit"
 	PositionStake   PositionType = "stake"

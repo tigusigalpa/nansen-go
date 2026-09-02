@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// ErrNotFound through ErrInternal identify standard Nansen API error categories.
 var (
 	ErrNotFound        = errors.New("nansen: resource not found")
 	ErrUnauthorized    = errors.New("nansen: unauthorized")
@@ -23,6 +24,7 @@ var (
 	ErrInternal        = errors.New("nansen: internal server error")
 )
 
+// APIError describes an unsuccessful response returned by the Nansen API.
 type APIError struct {
 	StatusCode int
 	Message    string
@@ -46,6 +48,7 @@ func (e *APIError) Error() string {
 	return fmt.Sprintf("nansen API error %d", e.StatusCode)
 }
 
+// Is reports whether APIError corresponds to a known Nansen error category.
 func (e *APIError) Is(target error) bool {
 	switch target {
 	case ErrNotFound:

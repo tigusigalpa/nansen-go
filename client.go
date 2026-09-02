@@ -25,6 +25,7 @@ type retryConfig struct {
 	retryRateLimit bool
 }
 
+// Client provides access to the Nansen AI API services.
 type Client struct {
 	apiKey     string
 	baseURL    string
@@ -39,6 +40,7 @@ type Client struct {
 	Historical   *HistoricalService
 }
 
+// New creates a Client using apiKey and applies the supplied options.
 func New(apiKey string, opts ...Option) (*Client, error) {
 	if apiKey == "" {
 		return nil, fmt.Errorf("nansen: API key is required")

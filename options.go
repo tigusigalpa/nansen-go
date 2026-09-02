@@ -6,8 +6,10 @@ import (
 	"time"
 )
 
+// Option configures a Client during construction.
 type Option func(*Client) error
 
+// WithBaseURL overrides the Nansen API base URL.
 func WithBaseURL(url string) Option {
 	return func(c *Client) error {
 		baseURL, err := normalizeBaseURL(url)
@@ -19,6 +21,7 @@ func WithBaseURL(url string) Option {
 	}
 }
 
+// WithHTTPClient uses client to make HTTP requests.
 func WithHTTPClient(client *http.Client) Option {
 	return func(c *Client) error {
 		if client == nil {
@@ -29,6 +32,7 @@ func WithHTTPClient(client *http.Client) Option {
 	}
 }
 
+// WithTimeout sets the default timeout for requests without a deadline.
 func WithTimeout(timeout time.Duration) Option {
 	return func(c *Client) error {
 		if timeout <= 0 {
@@ -39,6 +43,7 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
+// WithRetry enables retries with exponential backoff for transient failures.
 func WithRetry(maxAttempts int, initialDelay, maxDelay time.Duration) Option {
 	return func(c *Client) error {
 		if maxAttempts < 0 {
