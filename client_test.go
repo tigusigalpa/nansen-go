@@ -129,3 +129,35 @@ func TestDoRequest_ContextCancellation(t *testing.T) {
 		t.Fatal("expected error due to context deadline, got nil")
 	}
 }
+
+func TestDoRequest_DiscardResponseBody(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("ignored"))
+	}))
+	defer srv.Close()
+
+	c := newTestClient(t, srv)
+	if err := c.doRequest(context.Background(), http.MethodGet, "/ping", nil, nil); err != nil {
+		t.Fatalf("doRequest() error = %v", err)
+	}
+}
+
+func TestDoRequest_RejectsInvalidJSON(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("not json"))
+	}))
+	defer srv.Close()
+
+	c := newTestClient(t, srv)
+	var out map[string]string
+	if err := c.doRequest(context.Background(), http.MethodGet, "/ping", nil, &out); err == nil {
+		t.Fatal("expected decode error, got nil")
+	}
+}
+
+func TestClientBackoffCapsDelay(t *testing.T) {
+	c := &Client{retry: retryConfig{initialDelay: time.Second, maxDelay: 2 * time.Second}}
+	if got := c.backoff(3); got != 2*time.Second {
+		t.Errorf("backoff() = %v, want 2s", got)
+	}
+}

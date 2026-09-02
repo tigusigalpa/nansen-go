@@ -65,6 +65,13 @@ func TestNewAPIError_ParsesDetailMessage(t *testing.T) {
 	}
 }
 
+func TestAPIError_ErrorUsesStatusText(t *testing.T) {
+	err := &APIError{StatusCode: http.StatusBadGateway}
+	if got, want := err.Error(), "nansen API error 502"; got != want {
+		t.Errorf("Error() = %q, want %q", got, want)
+	}
+}
+
 func TestNewAPIError_ParsesHeaders(t *testing.T) {
 	resp := newResponse(t, http.StatusTooManyRequests, `{"detail":"slow down"}`, map[string]string{
 		"Retry-After":           "30",
@@ -97,6 +104,16 @@ func TestParseRetryAfter_PrefersRetryAfterHeader(t *testing.T) {
 	got := parseRetryAfter(resp, 2*time.Second)
 	if got != 7*time.Second {
 		t.Errorf("parseRetryAfter() = %v, want 7s", got)
+	}
+}
+
+func TestParseRetryAfterHeaderHTTPDateAndInvalidValue(t *testing.T) {
+	future := time.Now().Add(time.Hour).UTC().Format(http.TimeFormat)
+	if d, ok := parseRetryAfterHeader(newResponse(t, http.StatusTooManyRequests, "", map[string]string{"Retry-After": future})); !ok || d <= 0 {
+		t.Errorf("parseRetryAfterHeader() = (%v, %v), want positive duration", d, ok)
+	}
+	if _, ok := parseRetryAfterHeader(newResponse(t, http.StatusTooManyRequests, "", map[string]string{"Retry-After": "invalid"})); ok {
+		t.Error("parseRetryAfterHeader() accepted invalid value")
 	}
 }
 

@@ -1,6 +1,7 @@
 package nansen
 
 import (
+	"net/http"
 	"testing"
 	"time"
 )
@@ -58,6 +59,20 @@ func TestNew_RejectsNilOption(t *testing.T) {
 func TestWithTimeout_RejectsNonPositive(t *testing.T) {
 	if _, err := New("key", WithTimeout(0)); err == nil {
 		t.Error("expected error for zero timeout")
+	}
+}
+
+func TestClientOptionsApplyValues(t *testing.T) {
+	httpClient := &http.Client{}
+	c, err := New("key", WithHTTPClient(httpClient), WithTimeout(time.Second))
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+	if c.httpClient != httpClient || c.timeout != time.Second {
+		t.Error("client options were not applied")
+	}
+	if _, err := New("key", WithHTTPClient(nil)); err == nil {
+		t.Error("expected error for nil HTTP client")
 	}
 }
 
