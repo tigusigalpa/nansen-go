@@ -1,4 +1,4 @@
-# nansen-go
+# Nansen AI Golang SDK
 
 ![Nansen AI Golang SDK](https://i.postimg.cc/hGsGsnDF/nansen-ai-api-golang.jpg)
 
