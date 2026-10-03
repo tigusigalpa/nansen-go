@@ -1,6 +1,6 @@
-# Nansen AI Golang SDK
+# Nansen AI Golang Client/SDK/Library
 
-![Nansen AI Golang SDK](https://i.postimg.cc/hGsGsnDF/nansen-ai-api-golang.jpg)
+![Nansen AI Golang SDK](https://i.postimg.cc/zBnWVQfX/nansen-golang-sdk-hero.jpg)
 
 [![CI](https://github.com/tigusigalpa/nansen-go/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/nansen-go/actions/workflows/ci.yml)
 [![Tests](https://github.com/tigusigalpa/nansen-go/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/nansen-go/actions/workflows/test.yml)

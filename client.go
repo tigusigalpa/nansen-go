@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -136,22 +137,26 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body, out i
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			if out == nil {
 				if _, err := io.Copy(io.Discard, resp.Body); err != nil {
-					resp.Body.Close()
-					return fmt.Errorf("nansen: failed to read response body: %w", err)
+					return fmt.Errorf("nansen: failed to read response body: %w", errors.Join(err, closeResponseBody(resp.Body)))
 				}
-				resp.Body.Close()
+				if err := closeResponseBody(resp.Body); err != nil {
+					return err
+				}
 				return nil
 			}
 			if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
-				resp.Body.Close()
-				return fmt.Errorf("nansen: failed to decode response: %w", err)
+				return fmt.Errorf("nansen: failed to decode response: %w", errors.Join(err, closeResponseBody(resp.Body)))
 			}
-			resp.Body.Close()
+			if err := closeResponseBody(resp.Body); err != nil {
+				return err
+			}
 			return nil
 		}
 
 		apiErr := newAPIError(resp)
-		resp.Body.Close()
+		if err := closeResponseBody(resp.Body); err != nil {
+			return errors.Join(apiErr, err)
+		}
 
 		if c.retry.retryRateLimit && resp.StatusCode == http.StatusTooManyRequests && attempt < c.retry.maxAttempts {
 			wait := parseRetryAfter(resp, c.backoff(attempt))
@@ -172,6 +177,13 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body, out i
 	}
 
 	return fmt.Errorf("nansen: request exceeded maximum retry attempts")
+}
+
+func closeResponseBody(body io.Closer) error {
+	if err := body.Close(); err != nil {
+		return fmt.Errorf("nansen: failed to close response body: %w", err)
+	}
+	return nil
 }
 
 func (c *Client) backoff(attempt int) time.Duration {
