@@ -1,10 +1,158 @@
 package nansen
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+)
+
+// ProfilerLabelsChain identifies chains supported by the address-label endpoints.
+type ProfilerLabelsChain string
+
+// ProfilerLabelsChainAll through ProfilerLabelsChainTron are supported by address labels.
+const (
+	ProfilerLabelsChainAll         ProfilerLabelsChain = "all"
+	ProfilerLabelsChainArbitrum    ProfilerLabelsChain = "arbitrum"
+	ProfilerLabelsChainArc         ProfilerLabelsChain = "arc"
+	ProfilerLabelsChainAvalanche   ProfilerLabelsChain = "avalanche"
+	ProfilerLabelsChainBase        ProfilerLabelsChain = "base"
+	ProfilerLabelsChainBNB         ProfilerLabelsChain = "bnb"
+	ProfilerLabelsChainEthereum    ProfilerLabelsChain = "ethereum"
+	ProfilerLabelsChainHyperEVM    ProfilerLabelsChain = "hyperevm"
+	ProfilerLabelsChainHyperliquid ProfilerLabelsChain = "hyperliquid"
+	ProfilerLabelsChainIotaEVM     ProfilerLabelsChain = "iotaevm"
+	ProfilerLabelsChainLinea       ProfilerLabelsChain = "linea"
+	ProfilerLabelsChainMantle      ProfilerLabelsChain = "mantle"
+	ProfilerLabelsChainMonad       ProfilerLabelsChain = "monad"
+	ProfilerLabelsChainOptimism    ProfilerLabelsChain = "optimism"
+	ProfilerLabelsChainPlasma      ProfilerLabelsChain = "plasma"
+	ProfilerLabelsChainPolygon     ProfilerLabelsChain = "polygon"
+	ProfilerLabelsChainRobinhood   ProfilerLabelsChain = "robinhood"
+	ProfilerLabelsChainSei         ProfilerLabelsChain = "sei"
+	ProfilerLabelsChainSolana      ProfilerLabelsChain = "solana"
+	ProfilerLabelsChainSonic       ProfilerLabelsChain = "sonic"
+	ProfilerLabelsChainTron        ProfilerLabelsChain = "tron"
+)
+
+// ProfilerAddressLabelsRequest specifies a non-premium address-label query.
+type ProfilerAddressLabelsRequest struct {
+	Address    string              `json:"address"`
+	Chain      ProfilerLabelsChain `json:"chain"`
+	Pagination *PaginationRequest  `json:"pagination,omitempty"`
+}
+
+// ProfilerAddressPremiumLabelsRequest specifies a premium address-label query.
+type ProfilerAddressPremiumLabelsRequest struct {
+	Address    string              `json:"address"`
+	Chain      ProfilerLabelsChain `json:"chain"`
+	Pagination *PaginationRequest  `json:"pagination,omitempty"`
+}
+
+// ProfilerAddressLabel is a documented label row. It does not imply taxonomy version or identity.
+type ProfilerAddressLabel struct {
+	Label    string   `json:"label"`
+	Category *string  `json:"category,omitempty"`
+	Kind     []string `json:"kind,omitempty"`
+}
+
+// ProfilerAddressLabelsResponse contains non-premium labels and the exact provider receipt.
+type ProfilerAddressLabelsResponse struct {
+	Data       []ProfilerAddressLabel     `json:"data"`
+	Pagination PaginationInfo             `json:"pagination"`
+	Raw        json.RawMessage            `json:"-"`
+	Unknown    map[string]json.RawMessage `json:"-"`
+}
+
+// ProfilerAddressPremiumLabelsResponse contains premium labels and the exact provider receipt.
+type ProfilerAddressPremiumLabelsResponse ProfilerAddressLabelsResponse
+
+func isProfilerLabelsChain(chain ProfilerLabelsChain) bool {
+	switch chain {
+	case ProfilerLabelsChainAll, ProfilerLabelsChainArbitrum, ProfilerLabelsChainArc,
+		ProfilerLabelsChainAvalanche, ProfilerLabelsChainBase, ProfilerLabelsChainBNB,
+		ProfilerLabelsChainEthereum, ProfilerLabelsChainHyperEVM, ProfilerLabelsChainHyperliquid,
+		ProfilerLabelsChainIotaEVM, ProfilerLabelsChainLinea, ProfilerLabelsChainMantle,
+		ProfilerLabelsChainMonad, ProfilerLabelsChainOptimism, ProfilerLabelsChainPlasma,
+		ProfilerLabelsChainPolygon, ProfilerLabelsChainRobinhood, ProfilerLabelsChainSei,
+		ProfilerLabelsChainSolana, ProfilerLabelsChainSonic, ProfilerLabelsChainTron:
+		return true
+	}
+	return false
+}
+
+func validateProfilerLabelsRequest(address string, chain ProfilerLabelsChain) error {
+	if address == "" {
+		return fmt.Errorf("nansen: address is required")
+	}
+	if !isProfilerLabelsChain(chain) {
+		return fmt.Errorf("nansen: chain %q is not supported by profiler address labels", chain)
+	}
+	return nil
+}
+
+// UnmarshalJSON preserves the complete provider response alongside documented fields.
+func (r *ProfilerAddressLabelsResponse) UnmarshalJSON(data []byte) error {
+	type response struct {
+		Data       []ProfilerAddressLabel `json:"data"`
+		Pagination PaginationInfo         `json:"pagination"`
+	}
+	var decoded response
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	delete(fields, "data")
+	delete(fields, "pagination")
+	r.Data, r.Pagination, r.Raw, r.Unknown = decoded.Data, decoded.Pagination, append(r.Raw[:0], data...), fields
+	return nil
+}
+
+// UnmarshalJSON preserves the complete premium-label response alongside documented fields.
+func (r *ProfilerAddressPremiumLabelsResponse) UnmarshalJSON(data []byte) error {
+	var decoded ProfilerAddressLabelsResponse
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*r = ProfilerAddressPremiumLabelsResponse(decoded)
+	return nil
+}
 
 // ProfilerService provides access to wallet-level Profiler endpoints.
 type ProfilerService struct {
 	client *Client
+}
+
+// AddressLabels returns non-premium labels for an address on a supported chain.
+func (s *ProfilerService) AddressLabels(ctx context.Context, req *ProfilerAddressLabelsRequest) (*ProfilerAddressLabelsResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("nansen: address labels request is required")
+	}
+	if err := validateProfilerLabelsRequest(req.Address, req.Chain); err != nil {
+		return nil, err
+	}
+	resp := &ProfilerAddressLabelsResponse{}
+	if err := s.client.doRequest(ctx, "POST", "/api/v1/profiler/address/labels", req, resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// AddressPremiumLabels returns all labels, including premium labels, for an address.
+func (s *ProfilerService) AddressPremiumLabels(ctx context.Context, req *ProfilerAddressPremiumLabelsRequest) (*ProfilerAddressPremiumLabelsResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("nansen: premium address labels request is required")
+	}
+	if err := validateProfilerLabelsRequest(req.Address, req.Chain); err != nil {
+		return nil, err
+	}
+	resp := &ProfilerAddressPremiumLabelsResponse{}
+	if err := s.client.doRequest(ctx, "POST", "/api/v1/profiler/address/premium-labels", req, resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 // ProfilerAddressBalancesSortField enumerates the sortable balance fields.

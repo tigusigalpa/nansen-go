@@ -1,10 +1,135 @@
 package nansen
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"time"
+)
 
 // SmartMoneyService provides access to Smart Money endpoints.
 type SmartMoneyService struct {
 	client *Client
+}
+
+// SmartMoneyHistoricalHoldingsChain identifies chains supported by historical holdings.
+type SmartMoneyHistoricalHoldingsChain string
+
+// HistoricalHoldingsChainArc through HistoricalHoldingsChainSolana are supported by historical holdings.
+const (
+	HistoricalHoldingsChainArc       SmartMoneyHistoricalHoldingsChain = "arc"
+	HistoricalHoldingsChainBase      SmartMoneyHistoricalHoldingsChain = "base"
+	HistoricalHoldingsChainBNB       SmartMoneyHistoricalHoldingsChain = "bnb"
+	HistoricalHoldingsChainEthereum  SmartMoneyHistoricalHoldingsChain = "ethereum"
+	HistoricalHoldingsChainMonad     SmartMoneyHistoricalHoldingsChain = "monad"
+	HistoricalHoldingsChainRobinhood SmartMoneyHistoricalHoldingsChain = "robinhood"
+	HistoricalHoldingsChainSolana    SmartMoneyHistoricalHoldingsChain = "solana"
+)
+
+// DateOnlyRange is a YYYY-MM-DD date range. To may be omitted and defaults to today upstream.
+type DateOnlyRange struct {
+	From string `json:"from"`
+	To   string `json:"to,omitempty"`
+}
+
+// SmartMoneyHistoricalHoldingsFilters limits historical smart-money holdings results.
+type SmartMoneyHistoricalHoldingsFilters struct {
+	IncludeSmartMoneyLabels []HistoricalSmartMoneyFilterType `json:"include_smart_money_labels,omitempty"`
+	ExcludeSmartMoneyLabels []HistoricalSmartMoneyFilterType `json:"exclude_smart_money_labels,omitempty"`
+	IncludeStablecoins      *bool                            `json:"include_stablecoins,omitempty"`
+	IncludeNativeTokens     *bool                            `json:"include_native_tokens,omitempty"`
+	Balance                 *NumericRangeFilter              `json:"balance,omitempty"`
+	ValueUSD                *NumericRangeFilter              `json:"value_usd,omitempty"`
+	Balance24HPercentChange *NumericRangeFilter              `json:"balance_24h_percent_change,omitempty"`
+	HoldersCount            *IntegerRangeFilter              `json:"holders_count,omitempty"`
+	ShareOfHoldingsPercent  *NumericRangeFilter              `json:"share_of_holdings_percent,omitempty"`
+	TokenAgeDays            *NumericRangeFilter              `json:"token_age_days,omitempty"`
+	MarketCapUSD            *NumericRangeFilter              `json:"market_cap_usd,omitempty"`
+	TokenAddress            interface{}                      `json:"token_address,omitempty"`
+	TokenSymbol             interface{}                      `json:"token_symbol,omitempty"`
+}
+
+// SmartMoneyHistoricalHoldingsRequest specifies a v1 daily historical holdings query.
+type SmartMoneyHistoricalHoldingsRequest struct {
+	DateRange  DateOnlyRange                        `json:"date_range"`
+	Chains     []SmartMoneyHistoricalHoldingsChain  `json:"chains"`
+	Filters    *SmartMoneyHistoricalHoldingsFilters `json:"filters,omitempty"`
+	Pagination *PaginationRequest                   `json:"pagination,omitempty"`
+	OrderBy    []SortOrder                          `json:"order_by,omitempty"`
+}
+
+// SmartMoneyHistoricalHolding contains one provider-dated daily holding snapshot.
+type SmartMoneyHistoricalHolding struct {
+	Date                    string      `json:"date"`
+	Chain                   string      `json:"chain"`
+	TokenAddress            string      `json:"token_address"`
+	TokenSymbol             string      `json:"token_symbol"`
+	TokenSectors            []string    `json:"token_sectors"`
+	SmartMoneyLabels        []string    `json:"smart_money_labels"`
+	Balance                 ExactNumber `json:"balance"`
+	ValueUSD                ExactNumber `json:"value_usd"`
+	Balance24HPercentChange ExactNumber `json:"balance_24h_percent_change"`
+	HoldersCount            int         `json:"holders_count"`
+	ShareOfHoldingsPercent  ExactNumber `json:"share_of_holdings_percent"`
+	TokenAgeDays            int         `json:"token_age_days"`
+	MarketCapUSD            ExactNumber `json:"market_cap_usd"`
+}
+
+// SmartMoneyHistoricalHoldingsResponse contains daily historical holdings and the exact provider receipt.
+type SmartMoneyHistoricalHoldingsResponse struct {
+	Data       []SmartMoneyHistoricalHolding `json:"data"`
+	Pagination PaginationInfo                `json:"pagination"`
+	Raw        json.RawMessage               `json:"-"`
+	Unknown    map[string]json.RawMessage    `json:"-"`
+}
+
+// UnmarshalJSON preserves the exact response and unknown outer fields.
+func (r *SmartMoneyHistoricalHoldingsResponse) UnmarshalJSON(data []byte) error {
+	type response struct {
+		Data       []SmartMoneyHistoricalHolding `json:"data"`
+		Pagination PaginationInfo                `json:"pagination"`
+	}
+	var decoded response
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	delete(fields, "data")
+	delete(fields, "pagination")
+	r.Data, r.Pagination, r.Raw, r.Unknown = decoded.Data, decoded.Pagination, append(r.Raw[:0], data...), fields
+	return nil
+}
+
+// HistoricalHoldings returns daily smart-money holdings for the requested date range.
+func (s *SmartMoneyService) HistoricalHoldings(ctx context.Context, req *SmartMoneyHistoricalHoldingsRequest) (*SmartMoneyHistoricalHoldingsResponse, error) {
+	if req == nil || req.DateRange.From == "" || len(req.Chains) == 0 {
+		return nil, fmt.Errorf("nansen: historical holdings require date_range.from and chains")
+	}
+	if _, err := time.Parse("2006-01-02", req.DateRange.From); err != nil {
+		return nil, fmt.Errorf("nansen: date_range.from must use YYYY-MM-DD: %w", err)
+	}
+	if req.DateRange.To != "" {
+		if _, err := time.Parse("2006-01-02", req.DateRange.To); err != nil {
+			return nil, fmt.Errorf("nansen: date_range.to must use YYYY-MM-DD: %w", err)
+		}
+	}
+	for _, chain := range req.Chains {
+		switch chain {
+		case HistoricalHoldingsChainArc, HistoricalHoldingsChainBase, HistoricalHoldingsChainBNB,
+			HistoricalHoldingsChainEthereum, HistoricalHoldingsChainMonad,
+			HistoricalHoldingsChainRobinhood, HistoricalHoldingsChainSolana:
+		default:
+			return nil, fmt.Errorf("nansen: chain %q is not supported by historical holdings", chain)
+		}
+	}
+	resp := &SmartMoneyHistoricalHoldingsResponse{}
+	if err := s.client.doRequest(ctx, "POST", "/api/v1/smart-money/historical-holdings", req, resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 // SmartMoneyNetflowSortField enumerates the sortable fields for netflows.
