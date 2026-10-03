@@ -9,8 +9,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: '1.22.x'
       - name: Run tests with coverage
@@ -18,7 +18,7 @@ jobs:
           go test -race -covermode=atomic -coverprofile=coverage.out ./...
           go tool cover -func=coverage.out
       - name: Upload to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           files: ./coverage.out
           flags: unittests
