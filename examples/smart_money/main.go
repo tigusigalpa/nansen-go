@@ -80,6 +80,29 @@ func main() {
 		fmt.Printf("  %s: valueUSD=%v holders=%d\n", h.TokenSymbol, ptrFloat(h.ValueUsd), h.HoldersCount)
 	}
 
+	// Daily historical holdings preserve provider numeric lexemes in ExactNumber.
+	ctxHistorical, cancelHistorical := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancelHistorical()
+	historical, err := client.SmartMoney.HistoricalHoldings(ctxHistorical, &nansen.SmartMoneyHistoricalHoldingsRequest{
+		DateRange: nansen.DateOnlyRange{
+			From: time.Now().AddDate(0, 0, -7).Format("2006-01-02"),
+			To:   time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+		},
+		Chains: []nansen.SmartMoneyHistoricalHoldingsChain{nansen.HistoricalHoldingsChainEthereum},
+		Pagination: &nansen.PaginationRequest{
+			Page:    nansen.IntPtr(1),
+			PerPage: nansen.IntPtr(10),
+		},
+	})
+	if err != nil {
+		log.Fatalf("historical holdings request failed: %v", err)
+	}
+
+	fmt.Println("\nHistorical holdings")
+	for _, h := range historical.Data {
+		fmt.Printf("  %s %s: balance=%s valueUSD=%s\n", h.Date, h.TokenSymbol, h.Balance.Lexeme, h.ValueUSD.Lexeme)
+	}
+
 	// DEX trades
 	ctx3, cancel3 := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel3()

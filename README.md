@@ -112,9 +112,9 @@ client, err := nansen.New(apiKey,
 
 The API surface is split into services that hang off the client:
 
-- `client.SmartMoney` — netflows, holdings, and DEX trades.
+- `client.SmartMoney` — netflows, current and historical holdings, and DEX trades.
 - `client.TokenGodMode` — the token screener, flow intelligence, and who-bought-sold.
-- `client.Profiler` — current balances and DEX trade history for an address.
+- `client.Profiler` — current balances, labels (including premium labels), and DEX trade history for an address.
 - `client.Portfolio` — DeFi holdings.
 - `client.Historical` — the backtesting endpoints under `/api/v1beta1/`.
 
@@ -190,7 +190,7 @@ To keep that from getting tedious, there are little helpers for the common types
 
 ## Examples
 
-If you'd rather learn by running something, the [`examples`](examples/) directory has a few complete programs:
+If you'd rather learn by running something, the [`examples`](examples) directory has a few complete programs:
 
 - [`examples/screener`](examples/screener/main.go) — the token screener with filters and sorting.
 - [`examples/profiler`](examples/profiler/main.go) — address balances and DEX trade history.
@@ -202,12 +202,50 @@ Point one at your API key and go:
 NANSEN_API_KEY=your_api_key go run ./examples/screener
 ```
 
+### Address labels
+
+Use the endpoint-specific `ProfilerLabelsChain` type for labels. The regular endpoint excludes premium labels; use
+`AddressPremiumLabels` when those classifications are required.
+
+```go
+labels, err := client.Profiler.AddressLabels(ctx, &nansen.ProfilerAddressLabelsRequest{
+    Address: "0x0000000000000000000000000000000000000000",
+    Chain:   nansen.ProfilerLabelsChainEthereum,
+})
+if err != nil {
+    log.Fatal(err)
+}
+for _, label := range labels.Data {
+    fmt.Println(label.Label)
+}
+```
+
+### Historical Smart Money holdings
+
+`HistoricalHoldings` is a v1 daily-snapshot endpoint. It is distinct from the v1beta1 `as_of_date` backtesting
+endpoint. Its economic fields use `ExactNumber`, preserving the provider's numeric JSON lexeme; check `Present` and
+`Null` before reading `Lexeme` when absent, `null`, and zero must remain distinct.
+
+```go
+resp, err := client.SmartMoney.HistoricalHoldings(ctx, &nansen.SmartMoneyHistoricalHoldingsRequest{
+    DateRange: nansen.DateOnlyRange{From: "2026-09-01", To: "2026-09-30"},
+    Chains:    []nansen.SmartMoneyHistoricalHoldingsChain{nansen.HistoricalHoldingsChainEthereum},
+})
+if err != nil {
+    log.Fatal(err)
+}
+for _, holding := range resp.Data {
+    fmt.Printf("%s %s: %s\n", holding.Date, holding.TokenSymbol, holding.ValueUSD.Lexeme)
+}
+```
+
 ## Endpoints covered
 
 ### Smart Money
 
 - `POST /api/v1/smart-money/netflow`
 - `POST /api/v1/smart-money/holdings`
+- `POST /api/v1/smart-money/historical-holdings`
 - `POST /api/v1/smart-money/dex-trades`
 
 ### Token God Mode & Screener
@@ -219,6 +257,8 @@ NANSEN_API_KEY=your_api_key go run ./examples/screener
 ### Profiler
 
 - `POST /api/v1/profiler/address/current-balance`
+- `POST /api/v1/profiler/address/labels`
+- `POST /api/v1/profiler/address/premium-labels`
 - `POST /api/v1/profiler/dex-trades`
 
 ### Portfolio

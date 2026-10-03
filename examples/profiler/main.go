@@ -49,6 +49,24 @@ func main() {
 		fmt.Printf("  %s: amount=%v valueUSD=%v\n", b.TokenSymbol, ptrFloat(b.TokenAmount), ptrFloat(b.ValueUsd))
 	}
 
+	// Address labels. Use AddressPremiumLabels to include premium classifications.
+	labels, err := client.Profiler.AddressLabels(ctx, &nansen.ProfilerAddressLabelsRequest{
+		Address: address,
+		Chain:   nansen.ProfilerLabelsChainEthereum,
+		Pagination: &nansen.PaginationRequest{
+			Page:    nansen.IntPtr(1),
+			PerPage: nansen.IntPtr(20),
+		},
+	})
+	if err != nil {
+		log.Fatalf("address labels request failed: %v", err)
+	}
+
+	fmt.Printf("\nLabels for %s\n", address)
+	for _, label := range labels.Data {
+		fmt.Printf("  %s (%s)\n", label.Label, ptrString(label.Category))
+	}
+
 	// DEX trades
 	ctx2, cancel2 := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel2()
