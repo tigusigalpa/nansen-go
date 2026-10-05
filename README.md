@@ -239,6 +239,40 @@ for _, holding := range resp.Data {
 }
 ```
 
+### Exact numeric request filters
+
+The legacy `NumericRangeFilter` remains available for compatibility. For filters where a decimal must reach Nansen
+without a `float64` conversion, use the additive `Exact…Request` methods and `ExactNumericRangeFilter`. Bounds are
+validated JSON-number lexemes; `null` is rejected because the documented range contracts do not support null bounds.
+
+| Exact method | Exact filter type |
+| --- | --- |
+| `Profiler.AddressCurrentBalanceExact` | `ProfilerAddressBalancesExactFilters` |
+| `SmartMoney.NetflowExact` | `SmartMoneyNetflowExactFilters` |
+| `SmartMoney.HoldingsExact` | `SmartMoneyHoldingsExactFilters` |
+| `SmartMoney.HistoricalHoldingsExact` | `SmartMoneyHistoricalHoldingsExactFilters` |
+
+```go
+min, err := nansen.ExactNumberFromLexeme("0.12345678901234567890123456789")
+if err != nil {
+    log.Fatal(err)
+}
+
+resp, err := client.SmartMoney.HoldingsExact(ctx, &nansen.SmartMoneyHoldingsExactRequest{
+    Chains: []nansen.Chain{nansen.ChainEthereum},
+    Filters: &nansen.SmartMoneyHoldingsExactFilters{
+        ValueUSD: &nansen.ExactNumericRangeFilter{Min: min},
+    },
+})
+_ = resp
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+The exact current-balance and Smart Money schemas are documented by Nansen under `/api/profiler/address-current-balances`,
+`/api/smart-money/netflows`, `/api/smart-money/holdings`, and `/api/smart-money/historical-holdings`.
+
 ## Endpoints covered
 
 ### Smart Money
